@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "gloom"
+name = "gloom-cli"
 version = "0.1.0"
 description = "A high-performance CLI for Google Cloud Context & ADC Switching"
 readme = "README.md"
