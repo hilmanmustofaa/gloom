@@ -210,9 +210,9 @@ class SymlinkManager:
         """
         # Create temp symlink in same directory (for atomic rename)
         temp_dir = target.parent
-        temp_fd, temp_path = tempfile.mkstemp(dir=temp_dir, prefix=".gloom_symlink_")
+        temp_fd, temp_path_str = tempfile.mkstemp(dir=temp_dir, prefix=".gloom_symlink_")
         os.close(temp_fd)
-        temp_path = Path(temp_path)
+        temp_path = Path(temp_path_str)
 
         try:
             # Remove temp file and create symlink

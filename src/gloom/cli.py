@@ -7,7 +7,7 @@ Application Default Credentials via symlink manipulation.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from rich.table import Table
@@ -16,6 +16,8 @@ from gloom import __version__
 from gloom.core.adc import ADCError, ADCManager, ADCNotFoundError
 from gloom.core.config import GloomConfig
 from gloom.core.gcloud import GcloudConfig
+from gloom.integrations import DirenvHook, PromptManager
+from gloom.security import AuditLogger, CredentialValidator, PermissionEnforcer
 from gloom.utils.logger import console, print_error, print_info, print_success, print_warning
 
 # Main app
@@ -42,6 +44,14 @@ config_app = typer.Typer(
 )
 app.add_typer(config_app, name="config")
 
+# Hook subcommand group
+hook_app = typer.Typer(
+    name="hook",
+    help="Shell integrations",
+    no_args_is_help=True,
+)
+app.add_typer(hook_app, name="hook")
+
 
 def version_callback(value: bool) -> None:
     """Print version and exit."""
@@ -52,8 +62,8 @@ def version_callback(value: bool) -> None:
 
 @app.callback()
 def main(
-    version: Annotated[
-        Optional[bool],
+    _version: Annotated[
+        bool | None,
         typer.Option(
             "--version",
             "-v",
@@ -65,6 +75,74 @@ def main(
 ) -> None:
     """🌙 Gloom - High-performance Google Cloud context & ADC switching."""
     pass
+
+
+# =============================================================================
+# Security Commands
+# =============================================================================
+
+
+@app.command("doctor", help="Check and fix security issues")
+def doctor(
+    fix: Annotated[bool, typer.Option("--fix", help="Automatically fix issues")] = False,
+) -> None:
+    """Check permissions and validate security configuration."""
+    config = GloomConfig()
+    enforcer = PermissionEnforcer(config.gloom.base_dir)
+
+    console.print("[bold]Running security checks...[/bold]")
+    issues = enforcer.check()
+
+    if not issues:
+        print_success("All permissions are secure.")
+        raise typer.Exit(0)
+
+    for issue in issues:
+        print_warning(f"{issue.description}: {issue.path}")
+
+    if fix:
+        console.print("\n[bold]Applying fixes...[/bold]")
+        count = enforcer.fix(issues)
+        if count == len(issues):
+            print_success(f"Fixed {count} issues.")
+        else:
+            print_warning(f"Fixed {count}/{len(issues)} issues.")
+    else:
+        console.print("\n[yellow]Run 'gloom doctor --fix' to secure permissions.[/yellow]")
+        raise typer.Exit(1)
+
+
+# =============================================================================
+# Integration Commands
+# =============================================================================
+
+
+@hook_app.command("direnv", help="Generate direnv configuration")
+def hook_direnv(
+    project: Annotated[
+        str | None,
+        typer.Argument(help="Specific project to generate hook for (default: auto-detect)"),
+    ] = None,
+) -> None:
+    """Generate shell exports for direnv."""
+    config = GloomConfig()
+    hook = DirenvHook(config)
+    output = hook.generate_hook(project)
+    print(output)  # Always print to stdout for eval
+
+
+@app.command("prompt", help="Get formatted prompt information")
+def prompt_info(
+    format_str: Annotated[
+        str,
+        typer.Option("--format", "-f", help="Format string (default: '({project})')"),
+    ] = "({project})",
+) -> None:
+    """Get prompt information."""
+    config = GloomConfig()
+    mgr = PromptManager(config)
+    output = mgr.get_prompt_info(format_str)
+    print(output, end="")  # No newline for prompt integration
 
 
 # =============================================================================
@@ -137,6 +215,18 @@ def switch_context(
             if project.account:
                 print_info(f"Account: {project.account}")
 
+        # Audit log
+        if config.audit_logging:
+            logger = AuditLogger(config.gloom.audit_log)
+            logger.log_event(
+                "context_switch",
+                details={
+                    "context": project.name,
+                    "project_id": project.project_id,
+                    "account": project.account,
+                },
+            )
+
     except ADCNotFoundError as e:
         print_error(str(e))
         raise typer.Exit(1) from e
@@ -189,7 +279,7 @@ def show_current(
 def cache_add(
     name: Annotated[str, typer.Argument(help="Name for this cached context")],
     source: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option("--source", "-s", help="Path to ADC file (default: current ADC)"),
     ] = None,
     force: Annotated[
@@ -200,6 +290,19 @@ def cache_add(
     """Cache an ADC file as a named context."""
     config = GloomConfig()
     adc_mgr = ADCManager(config)
+    validator = CredentialValidator()
+
+    # Validate source file if provided, otherwise check current ADC
+    source_path = source or config.gcloud.adc_file
+    if source_path.exists():
+        is_valid, issues = validator.validate_file(source_path)
+        if not is_valid:
+            print_error("Invalid credential file:")
+            for issue in issues:
+                console.print(f"  - [{issue.severity}] {issue.field}: {issue.message}")
+            if not force:
+                print_warning("Use --force to cache anyway.")
+                raise typer.Exit(1)
 
     try:
         project = adc_mgr.cache_adc(name, source_path=source, force=force)
@@ -210,9 +313,21 @@ def cache_add(
         if project.account:
             print_info(f"Account: {project.account}")
 
+        # Audit log
+        if config.audit_logging:
+            logger = AuditLogger(config.gloom.audit_log)
+            logger.log_event(
+                "cache_add",
+                details={
+                    "context": project.name,
+                    "project_id": project.project_id,
+                    "account": project.account,
+                },
+            )
+
     except FileExistsError:
         print_error(f"Context '{name}' already exists. Use --force to overwrite.")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from None
     except ADCError as e:
         print_error(f"Failed to cache ADC: {e}")
         raise typer.Exit(1) from e
