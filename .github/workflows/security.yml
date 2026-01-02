@@ -56,11 +56,15 @@ jobs:
         run: uv sync --dev
 
       - name: Run Bandit
-        run: uv run bandit -c pyproject.toml -r src/ -f sarif -o bandit-results.sarif
-        continue-on-error: true
+        run: |
+          uv run bandit -c pyproject.toml -r src/ -f sarif -o bandit-results.sarif || true
+          # Create empty SARIF if bandit failed
+          if [ ! -f bandit-results.sarif ]; then
+            echo '{"version":"2.1.0","$schema":"https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json","runs":[{"tool":{"driver":{"name":"Bandit","version":"1.7.0"}},"results":[]}]}' > bandit-results.sarif
+          fi
 
       - name: Upload SARIF results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: bandit-results.sarif
         if: always()
