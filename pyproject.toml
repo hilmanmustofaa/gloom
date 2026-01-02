@@ -48,10 +48,10 @@ dev = [
 gloom = "gloom.cli:app"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/gloom"
-Documentation = "https://github.com/yourusername/gloom#readme"
-Repository = "https://github.com/yourusername/gloom"
-Issues = "https://github.com/yourusername/gloom/issues"
+Homepage = "https://github.com/hilmanmustofaa/gloom"
+Documentation = "https://github.com/hilmanmustofaa/gloom#readme"
+Repository = "https://github.com/hilmanmustofaa/gloom"
+Issues = "https://github.com/hilmanmustofaa/gloom/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/gloom"]

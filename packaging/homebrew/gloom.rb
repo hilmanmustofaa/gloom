@@ -2,11 +2,11 @@ class Gloom < Formula
   include Language::Python::Virtualenv
 
   desc "High-performance CLI for Google Cloud Context & ADC Switching"
-  homepage "https://github.com/YOUR_USERNAME/gloom"
+  homepage "https://github.com/hilmanmustofaa/gloom"
   url "https://files.pythonhosted.org/packages/source/g/gloom/gloom-0.1.0.tar.gz"
   sha256 "REPLACE_WITH_ACTUAL_SHA256_AFTER_PYPI_PUBLISH"
   license "MIT"
-  head "https://github.com/YOUR_USERNAME/gloom.git", branch: "main"
+  head "https://github.com/hilmanmustofaa/gloom.git", branch: "main"
 
   depends_on "python@3.11"
 

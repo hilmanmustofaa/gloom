@@ -4,7 +4,7 @@ Release:        1%{?dist}
 Summary:        High-performance CLI for Google Cloud Context & ADC Switching
 
 License:        MIT
-URL:            https://github.com/YOUR_USERNAME/gloom
+URL:            https://github.com/hilmanmustofaa/gloom
 Source0:        %{url}/archive/refs/tags/v%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 BuildArch:      noarch

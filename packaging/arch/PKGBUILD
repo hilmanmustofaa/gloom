@@ -4,7 +4,7 @@ pkgver=0.1.0
 pkgrel=1
 pkgdesc="High-performance CLI for Google Cloud Context & ADC Switching"
 arch=('any')
-url="https://github.com/YOUR_USERNAME/gloom"
+url="https://github.com/hilmanmustofaa/gloom"
 license=('MIT')
 depends=(
     'python>=3.10'
@@ -18,7 +18,7 @@ makedepends=(
     'python-wheel'
     'python-hatchling'
 )
-source=("${pkgname}-${pkgver}.tar.gz::https://github.com/YOUR_USERNAME/gloom/archive/refs/tags/v${pkgver}.tar.gz")
+source=("${pkgname}-${pkgver}.tar.gz::https://github.com/hilmanmustofaa/gloom/archive/refs/tags/v${pkgver}.tar.gz")
 sha256sums=('SKIP')  # Update with actual checksum
 
 build() {

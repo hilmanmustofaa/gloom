@@ -2,7 +2,7 @@
 
 > High-performance CLI for Google Cloud Context & ADC Switching
 
-[![CI](https://github.com/yourusername/gloom/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/gloom/actions/workflows/ci.yml)
+[![CI](https://github.com/hilmanmustofaa/gloom/actions/workflows/ci.yml/badge.svg)](https://github.com/hilmanmustofaa/gloom/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -28,7 +28,7 @@ pip install gloom
 uv pip install gloom
 
 # From source
-git clone https://github.com/yourusername/gloom.git
+git clone https://github.com/hilmanmustofaa/gloom.git
 cd gloom
 uv sync --dev
 ```
@@ -110,7 +110,7 @@ Instead of re-authenticating with `gcloud auth application-default login` each t
 
 ```bash
 # Clone and setup
-git clone https://github.com/yourusername/gloom.git
+git clone https://github.com/hilmanmustofaa/gloom.git
 cd gloom
 uv sync --dev
 
