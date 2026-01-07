@@ -80,6 +80,17 @@ class ProjectConfig(BaseModel):
         return self.alias or self.name
 
 
+class SyncConfig(BaseModel):
+    """Configuration for sync mechanism."""
+
+    backend: str = "gcs"
+    bucket: str | None = None
+    prefix: str = "gloom/cache"
+    encryption_key: str | None = Field(default=None, validate_default=False)
+
+    model_config = {"frozen": True}
+
+
 class GloomConfig(BaseSettings):
     """Main configuration for Gloom CLI."""
 
@@ -99,6 +110,7 @@ class GloomConfig(BaseSettings):
     # Paths (computed, not from env)
     gcloud: GcloudPaths = Field(default_factory=GcloudPaths)
     gloom: GloomPaths = Field(default_factory=GloomPaths)
+    sync: SyncConfig = Field(default_factory=SyncConfig)
 
     # Cached projects registry
     projects: dict[str, ProjectConfig] = Field(default_factory=dict)

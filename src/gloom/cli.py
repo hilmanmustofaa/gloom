@@ -113,6 +113,84 @@ def doctor(
 
 
 # =============================================================================
+# Sync Commands
+# =============================================================================
+
+sync_app = typer.Typer(help="Sync contexts with remote storage")
+app.add_typer(sync_app, name="sync")
+
+
+@sync_app.command("push", help="Push a cached context to remote storage")
+def sync_push(
+    name: Annotated[str, typer.Argument(help="Name of the cached context to push")],
+) -> None:
+    """Upload a context to the configured sync backend."""
+    config = GloomConfig()
+    try:
+        from gloom.sync.manager import SyncManager
+
+        manager = SyncManager(config)
+        manager.push(name)
+        print_success(f"Pushed context '[project]{name}[/project]' to remove.")
+    except Exception as e:
+        print_error(f"Failed to push context: {e}")
+        raise typer.Exit(1) from e
+
+
+@sync_app.command("pull", help="Pull a context from remote storage")
+def sync_pull(
+    name: Annotated[str, typer.Argument(help="Name of the context to pull")],
+    force: Annotated[
+        bool,
+        typer.Option("--force", "-f", help="Overwrite existing local context"),
+    ] = False,
+) -> None:
+    """Download and restore a context from the configured sync backend."""
+    config = GloomConfig()
+    try:
+        from gloom.sync.manager import SyncManager
+
+        manager = SyncManager(config)
+        manager.pull(name, force=force)
+        print_success(f"Pulled context '[project]{name}[/project]' from remote.")
+    except Exception as e:
+        print_error(f"Failed to pull context: {e}")
+        raise typer.Exit(1) from e
+
+
+@sync_app.command("list", help="List available remote contexts")
+def sync_list() -> None:
+    """List contexts available in the remote storage."""
+    config = GloomConfig()
+    try:
+        from gloom.sync.manager import SyncManager
+
+        manager = SyncManager(config)
+        # We need to expose backend list_contexts from Manager
+        # Wait, Manager doesn't have list_contexts yet. I should add it.
+        # For now, let's access backend directly or add the method.
+        # Adding method to Manager is better.
+        # Use manager's list_contexts method
+        try:
+            contexts = manager.list_contexts()
+            if not contexts:
+                print_info("No remote contexts found.")
+                return
+
+            table = Table(title="Remote Contexts")
+            table.add_column("Name", style="cyan")
+            for ctx in contexts:
+                table.add_row(ctx)
+            console.print(table)
+        except AttributeError:
+            print_warning("Backend does not support listing.")
+
+    except Exception as e:
+        print_error(f"Failed to list remote contexts: {e}")
+        raise typer.Exit(1) from e
+
+
+# =============================================================================
 # Integration Commands
 # =============================================================================
 

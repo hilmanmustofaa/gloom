@@ -273,35 +273,67 @@ class ADCManager:
         Returns:
             List of ProjectConfig for each cached project.
         """
-        cache_dir = self.config.gloom.cache_dir
         projects: list[ProjectConfig] = []
-
-        if not cache_dir.exists():
+        if not self.config.gloom.cache_dir.exists():
             return projects
 
-        for project_dir in cache_dir.iterdir():
-            if not project_dir.is_dir():
-                continue
+        for path in self.config.gloom.cache_dir.iterdir():
+            if path.is_dir() and (path / "adc.json").exists():
+                adc_path = path / "adc.json"
+                try:
+                    # Parse ADC file to get details
+                    adc_info = self.validate_adc_file(adc_path)
 
-            adc_file = project_dir / "adc.json"
-            if not adc_file.exists():
-                continue
+                    # Create ProjectConfig
+                    # Note: We don't store aliases/metadata separately yet,
+                    # so we use path name as project name.
+                    # Timestamp is modification time of adc.json
+                    mtime = datetime.fromtimestamp(
+                        adc_path.stat().st_mtime, tz=timezone.utc
+                    ).isoformat()
 
-            try:
-                adc_info = self.validate_adc_file(adc_file)
-                projects.append(
-                    ProjectConfig(
-                        name=project_dir.name,
-                        project_id=adc_info.project_id or adc_info.quota_project_id,
+                    config = ProjectConfig(
+                        name=path.name,
+                        project_id=adc_info.project_id,
                         account=adc_info.account,
-                        adc_path=adc_file,
+                        adc_path=adc_path,
+                        cached_at=mtime,
                     )
-                )
-            except ADCError:
-                # Skip invalid cached ADCs
-                continue
+                    projects.append(config)
+                except (ADCValidationError, ADCNotFoundError):
+                    # Skip invalid cached projects
+                    continue
 
-        return projects
+        return sorted(projects, key=lambda p: p.name)
+
+    def get_project_config(self, project_name: str) -> ProjectConfig | None:
+        """Get configuration for a specific cached project.
+
+        Args:
+            project_name: Name of the project.
+
+        Returns:
+            ProjectConfig if found, None otherwise.
+        """
+        cache_dir = self.config.get_project_cache_path(project_name)
+        adc_path = cache_dir / "adc.json"
+
+        if not cache_dir.exists() or not adc_path.exists():
+            return None
+
+        try:
+            adc_info = self.validate_adc_file(adc_path)
+            mtime = datetime.fromtimestamp(adc_path.stat().st_mtime, tz=timezone.utc).isoformat()
+
+            return ProjectConfig(
+                name=project_name,
+                project_id=adc_info.project_id,
+                account=adc_info.account,
+                adc_path=adc_path,
+                cached_at=mtime,
+            )
+        except (ADCValidationError, ADCNotFoundError):
+            return None
 
     def remove_cached_project(self, project_name: str) -> bool:
         """Remove a cached project.
