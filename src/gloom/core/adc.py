@@ -152,7 +152,8 @@ class ADCManager:
 
         if cached_adc.exists() and not force:
             raise FileExistsError(
-                f"Project '{project_name}' already cached at {cache_dir}. Use force=True to overwrite."
+                f"Project '{project_name}' already cached at {cache_dir}. "
+                "Use force=True to overwrite."
             )
 
         # Create cache directory

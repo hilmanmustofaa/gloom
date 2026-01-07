@@ -94,7 +94,11 @@ class TestSwitchCommand:
     """Tests for switch command."""
 
     def test_switch_success(
-        self, mock_home: Path, mock_gloom_dir: Path, mock_gcloud_dir: Path, sample_adc_data: dict[str, Any]
+        self,
+        mock_home: Path,
+        mock_gloom_dir: Path,
+        mock_gcloud_dir: Path,
+        sample_adc_data: dict[str, Any],
     ) -> None:
         """Test switch to cached context."""
         # Create cached project
@@ -116,13 +120,17 @@ class TestSwitchCommand:
 class TestCurrentCommand:
     """Tests for current command."""
 
-    def test_current_no_adc(self, mock_home: Path, mock_gcloud_dir: Path, mock_gloom_dir: Path) -> None:
+    def test_current_no_adc(
+        self, mock_home: Path, mock_gcloud_dir: Path, mock_gloom_dir: Path
+    ) -> None:
         """Test current with no ADC configured."""
         result = runner.invoke(app, ["current"])
         assert result.exit_code == 1
         assert "No ADC configured" in result.stdout
 
-    def test_current_quiet_no_context(self, mock_home: Path, mock_gcloud_dir: Path, mock_gloom_dir: Path) -> None:
+    def test_current_quiet_no_context(
+        self, mock_home: Path, mock_gcloud_dir: Path, mock_gloom_dir: Path
+    ) -> None:
         """Test current --quiet with no context."""
         result = runner.invoke(app, ["current", "--quiet"])
         assert result.exit_code == 1

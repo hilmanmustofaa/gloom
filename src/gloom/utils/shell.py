@@ -78,37 +78,37 @@ class ShellExporter:
             shell = cls.detect_shell()
 
         if shell == Shell.FISH:
-            return '''
+            return """
 # Gloom ADC Context Hook
 function __gloom_prompt_hook --on-variable PWD
     set -gx GLOOM_CONTEXT (gloom current --quiet 2>/dev/null)
 end
 __gloom_prompt_hook
-'''
+"""
         elif shell == Shell.ZSH:
-            return '''
+            return """
 # Gloom ADC Context Hook
 __gloom_prompt_hook() {
     export GLOOM_CONTEXT="$(gloom current --quiet 2>/dev/null)"
 }
 precmd_functions+=(__gloom_prompt_hook)
-'''
+"""
         elif shell == Shell.POWERSHELL:
-            return '''
+            return """
 # Gloom ADC Context Hook
 function prompt {
     $env:GLOOM_CONTEXT = (gloom current --quiet 2>$null)
     "PS $($executionContext.SessionState.Path.CurrentLocation)$('>' * ($nestedPromptLevel + 1)) "
 }
-'''
+"""
         else:  # bash
-            return '''
+            return """
 # Gloom ADC Context Hook
 __gloom_prompt_hook() {
     export GLOOM_CONTEXT="$(gloom current --quiet 2>/dev/null)"
 }
 PROMPT_COMMAND="__gloom_prompt_hook${PROMPT_COMMAND:+;$PROMPT_COMMAND}"
-'''
+"""
 
     @classmethod
     def get_rc_file(cls, shell: Shell | None = None) -> Path:

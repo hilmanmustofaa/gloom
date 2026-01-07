@@ -72,7 +72,7 @@ class GcloudConfig:
         """
         try:
             result = subprocess.run(
-                ["gcloud", "--version"],
+                ["gcloud", "--version"],  # noqa: S603,S607
                 capture_output=True,
                 text=True,
                 check=False,
@@ -130,7 +130,7 @@ class GcloudConfig:
                     is_active=(config_name == active_name),
                 )
                 configurations.append(gcloud_config)
-            except Exception:  # noqa: S110
+            except Exception:  # noqa: S110,S112
                 # Skip malformed config files
                 continue
 

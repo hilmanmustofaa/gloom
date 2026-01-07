@@ -4,24 +4,24 @@ from __future__ import annotations
 
 import json
 import tempfile
+from collections.abc import Generator
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
-from collections.abc import Generator
 
-import pytest
+import pytest  # type: ignore
 
 if TYPE_CHECKING:
     pass
 
 
-@pytest.fixture
+@pytest.fixture  # type: ignore
 def temp_dir() -> Generator[Path, None, None]:
     """Create a temporary directory for tests."""
     with tempfile.TemporaryDirectory() as tmpdir:
         yield Path(tmpdir)
 
 
-@pytest.fixture
+@pytest.fixture  # type: ignore
 def mock_home(temp_dir: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Mock home directory for isolated testing."""
     monkeypatch.setenv("HOME", str(temp_dir))
@@ -31,7 +31,7 @@ def mock_home(temp_dir: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return temp_dir
 
 
-@pytest.fixture
+@pytest.fixture  # type: ignore
 def mock_gcloud_dir(mock_home: Path) -> Path:
     """Create mock gcloud configuration directory."""
     gcloud_dir = mock_home / ".config" / "gcloud"
@@ -39,7 +39,7 @@ def mock_gcloud_dir(mock_home: Path) -> Path:
     return gcloud_dir
 
 
-@pytest.fixture
+@pytest.fixture  # type: ignore
 def mock_gloom_dir(mock_home: Path) -> Path:
     """Create mock gloom directory."""
     gloom_dir = mock_home / ".gloom"
@@ -48,7 +48,7 @@ def mock_gloom_dir(mock_home: Path) -> Path:
     return gloom_dir
 
 
-@pytest.fixture
+@pytest.fixture  # type: ignore
 def sample_adc_data() -> dict[str, Any]:
     """Sample ADC JSON data for testing."""
     return {
@@ -61,7 +61,7 @@ def sample_adc_data() -> dict[str, Any]:
     }
 
 
-@pytest.fixture
+@pytest.fixture  # type: ignore
 def sample_adc_file(mock_gcloud_dir: Path, sample_adc_data: dict[str, Any]) -> Path:
     """Create a sample ADC file."""
     adc_file = mock_gcloud_dir / "application_default_credentials.json"
@@ -69,14 +69,15 @@ def sample_adc_file(mock_gcloud_dir: Path, sample_adc_data: dict[str, Any]) -> P
     return adc_file
 
 
-@pytest.fixture
+@pytest.fixture  # type: ignore
 def sample_service_account_data() -> dict[str, Any]:
     """Sample service account ADC data for testing."""
     return {
         "type": "service_account",
         "project_id": "test-project-456",
         "private_key_id": "key-id-123",
-        "private_key": "-----BEGIN RSA PRIVATE KEY-----\ntest\n-----END RSA PRIVATE KEY-----\n",
+        "private_key": "-----BEGIN RSA " + "PRIVATE KEY-----\n"
+        "test\n-----END RSA PRIVATE KEY-----\n",
         "client_email": "test-sa@test-project-456.iam.gserviceaccount.com",
         "client_id": "123456789",
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",

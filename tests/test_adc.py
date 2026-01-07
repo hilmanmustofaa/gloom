@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-import pytest
+import pytest  # type: ignore
 
 from gloom.core.adc import ADCManager, ADCNotFoundError, ADCValidationError
 from gloom.core.config import GloomConfig
@@ -92,9 +92,7 @@ class TestADCValidation:
 class TestADCCaching:
     """Tests for ADC caching operations."""
 
-    def test_cache_adc(
-        self, mock_home: Path, sample_adc_file: Path, mock_gloom_dir: Path
-    ) -> None:
+    def test_cache_adc(self, mock_home: Path, sample_adc_file: Path, mock_gloom_dir: Path) -> None:
         """Test caching an ADC file."""
         config = GloomConfig()
         mgr = ADCManager(config)

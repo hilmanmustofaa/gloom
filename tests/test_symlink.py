@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-import pytest
+import pytest  # type: ignore
 
 from gloom.core.symlink import SymlinkManager, SymlinkStatus
 
